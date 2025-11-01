@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Tirth Saraiya">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/controls/OrbitControls.js"></script>
+  <title>Nyx Console</title>
+  <style>
+    :root {
+      --quantum-core: #00f7ff;
+      --neural-purple: #9d00ff;
+      --dark-matter: #0a0a15;
+      --hologram-teal: rgba(0, 247, 255, 0.15);
+      --cyber-yellow: #f5d300;
+      --plasma-pink: #ff00aa;
+      --matrix-green: #00ff41;
+      --neon-red: #ff003c;
+      --ai-blue: #0066ff;
+    }
+
+    @font-face {
+      font-family: 'Rajdhani';
+      src: url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
+    }
+
+    @font-face {
+      font-family: 'Orbitron';
+      src: url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap');
+    }
+
+    body {
+      background: radial-gradient(ellipse at center, #0a0a15 0%, #000000 100%);
+      color: white;
+      font-family: 'Rajdhani', 'Courier New', monospace;
+      margin: 0;
+      overflow-x: hidden;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .quantum-glow {
+      box-shadow: 0 0 15px var(--quantum-core), 0 0 30px rgba(32, 244, 39, 0.3);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .quantum-glow:hover {
+      box-shadow: 0 0 25px var(--quantum-core), 0 0 50px rgba(32, 244, 39, 0.3);
+    }
+    .accessibility-mode * {
+      animation: none !important;
+      text-shadow: none !important;
+    }
+    .accessibility-mode .message-bubble {
+      background: #000 !important;
+      color: #fff !important;
+    }
+    .accessibility-mode {
+      background: #001133 !important;
+    }
+    .hologram-panel {
+      background: linear-gradient(135deg, rgba(0, 247, 255, 0.08), rgba(157, 0, 255, 0.05));
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 247, 255, 0.3);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hologram-panel::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to bottom right, transparent 0%, rgba(0, 247, 255, 0.1) 50%, transparent 100%);
+      transform: rotate(30deg);
+      animation: hologram-scan 6s linear infinite;
+    }
+
+    .cyber-text {
+      text-shadow: 0 0 10px var(--quantum-core), 0 0 20px rgba(0, 247, 255, 0.4);
+      letter-spacing: 1.5px;
+    }
+
+    .cyber-border {
+      position: relative;
+      border: 1px solid transparent;
+    }
+
+    .cyber-border::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, var(--quantum-core), var(--neural-purple));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+      -webkit-mask-composite: xor;
+      pointer-events: none;
+    }
+
+    @keyframes hologram-scan {
+      0% { transform: rotate(30deg) translateY(-100%); }
+      100% { transform: rotate(30deg) translateY(100%); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(3deg); }
+    }
+
+    @keyframes glitch {
+      0% { text-shadow: 2px 0 var(--quantum-core), -2px 0 var(--plasma-pink); }
+      25% { text-shadow: -2px 0 var(--plasma-pink), 2px 0 var(--matrix-green); }
+      50% { text-shadow: 2px 0 var(--matrix-green), -2px 0 var(--cyber-yellow); }
+      75% { text-shadow: -2px 0 var(--cyber-yellow), 2px 0 var(--quantum-core); }
+      100% { text-shadow: 2px 0 var(--quantum-core), -2px 0 var(--plasma-pink); }
+    }
+
+    @keyframes particle-rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    /* Container styling */
+    #matrix-tab {
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background-color: #1e1e2f;
+      color: #f0f0f0;
+      border-radius: 8px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    /* Controls */
+    #matrix-controls {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    #matrix-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #444;
+      background-color: #2b2b3e;
+      color: #fff;
+    }
+
+    #matrix-generate-btn,
+    #matrix-random-btn,
+    #matrix-replay-btn {
+      padding: 10px 15px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+      background-color: #3a3a5c;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #matrix-generate-btn:hover,
+    #matrix-random-btn:hover,
+    #matrix-replay-btn:hover {
+      background-color: #57577d;
+    }
+
+    /* Matrix grid */
+    #matrix-container {
+      display: grid;
+      grid-template-columns: repeat(16, 40px);
+      grid-auto-rows: 40px;
+      gap: 2px;
+      background-color: #111;
+      padding: 10px;
+      border-radius: 5px;
+      min-height: 300px;
+    }
+
+    .matrix-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #fff;
+      border-radius: 3px;
+      transition: all 0.3s ease;
+      cursor: default;
+    }
+
+    .matrix-cell:hover {
+      transform: scale(1.1);
+      border: 2px solid yellow;
+      z-index: 1;
+    }
+
+    /* Status text */
+    #matrix-status {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 800px) {
+      #matrix-container {
+        grid-template-columns: repeat(12, 30px);
+        grid-auto-rows: 30px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      #matrix-container {
+        grid-template-columns: repeat(8, 25px);
+        grid-auto-rows: 25px;
+      }
+
+      #matrix-input {
+        flex: 100%;
+        margin-bottom: 10px;
+      }
+    }
+    #threejs-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      width: 100vw;
+      height: 100vh;
+      opacity: 0.9;
+    }
+
+    .typing-cursor {
+      animation: blink 1s infinite, glitch 0.5s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .cyber-button {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+      z-index: 1;
+    }
+
+    .cyber-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 247, 255, 0.4), transparent);
+      transition: all 0.5s;
+      z-index: -1;
+    }
+
+    .cyber-button:hover::before {
+      left: 100%;
+    }
+    #matrix-tab.active {
+      color: var(--quantum-core);
+    }
+    #matrix-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 2px;
+      background: var(--quantum-core);
+      box-shadow: 0 0 8px var(--quantum-core);
+    }
+    #matrix-controls {
+      margin-bottom: 20px;
+    }
+    #matrix-input {
+      width: 300px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #444;
+    }
+    #matrix-fetch-btn {
+      padding: 10px 15px;
+      margin-left: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+      background-color: #3a3a5c;
+      color: #fff;
+      cursor: pointer;
+    }
+    #matrix-fetch-btn:hover {
+      background-color: #57577d;
+    }
+    #matrix-container {
+      display: grid;
+      grid-template-columns: repeat(16, 40px);
+      grid-auto-rows: 40px;
+      gap: 2px;
+      background-color: #111;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .matrix-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #fff;
+      border-radius: 3px;
+    }
+
+    .data-matrix {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(to right, rgba(0, 255, 157, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 255, 157, 0.05) 1px, transparent 1px);
+      background-size: 20px 20px;
+      z-index: -1;
+      opacity: 0.4;
+    }
+
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 5px;
+      animation: pulse 2s infinite;
+    }
+
+    .status-active {
+      background-color: var(--matrix-green);
+      box-shadow: 0 0 12px var(--matrix-green);
+    }
+
+    .status-standby {
+      background-color: var(--cyber-yellow);
+      box-shadow: 0 0 12px var(--cyber-yellow);
+    }
+
+    .status-error {
+      background-color: var(--neon-red);
+      box-shadow: 0 0 12px var(--neon-red);
+    }
+
+    .binary-rain {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+      opacity: 0.2;
+    }
+
+    .binary-digit {
+      position: absolute;
+      color: var(--matrix-green);
+      font-size: 16px;
+      font-family: monospace;
+      text-shadow: 0 0 8px var(--matrix-green);
+      animation: binary-fall linear infinite;
+    }
+
+    @keyframes binary-fall {
+      to { transform: translateY(100vh); }
+    }
+
+    .cyber-toggle {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 28px;
+    }
+
+    .cyber-toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .cyber-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #0a0a15;
+      border: 1px solid var(--quantum-core);
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .cyber-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 3px;
+      background-color: var(--quantum-core);
+      transition: .4s;
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--quantum-core);
+    }
+
+    input:checked + .cyber-slider {
+      background-color: var(--neural-purple);
+      border-color: var(--plasma-pink);
+    }
+
+    input:checked + .cyber-slider:before {
+      transform: translateX(30px);
+      background-color: var(--plasma-pink);
+      box-shadow: 0 0 8px var(--plasma-pink);
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(var(--quantum-core), var(--neural-purple));
+      border-radius: 4px;
+    }
+
+    .cyber-input {
+      background: rgba(10, 10, 21, 0.8);
+      border: 1px solid rgba(0, 247, 255, 0.4);
+      transition: all 0.3s;
+    }
+
+    .cyber-input:focus {
+      border-color: var(--quantum-core);
+      box-shadow: 0 0 15px rgba(0, 247, 255, 0.4);
+      outline: none;
+    }
+
+    .particle {
+      position: absolute;
+      background-color: var(--quantum-core);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .neon-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(to right, rgba(0, 247, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 247, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: -1;
+    }
+
+    .quantum-wave {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100px;
+      background: linear-gradient(to top, rgba(0, 247, 255, 0.1), transparent);
+      z-index: -1;
+      animation: wave-animation 10s linear infinite;
+    }
+
+    @keyframes wave-animation {
+      0% { transform: scaleY(1); }
+      50% { transform: scaleY(1.5); }
+      100% { transform: scaleY(1); }
+    }
+
+    .model-icon {
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: rgba(0, 247, 255, 0.1);
+      border: 1px solid rgba(0, 247, 255, 0.3);
+    }
+
+    .message-bubble {
+      max-width: 85%;
+      position: relative;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-radius: 18px;
+      animation: fadeIn 0.4s ease-out;
+      backdrop-filter: blur(100px);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .user-message {
+      background: linear-gradient(135deg, rgba(0, 123, 255, 0.2), rgba(0, 86, 179, 0.2));
+      border: 1px solid rgba(0, 123, 255, 0.4);
+      margin-left: auto;
+      border-top-right-radius: 4px;
+    }
+
+    .ai-message {
+      background: linear-gradient(135deg, rgba(10, 10, 21, 0.5), rgba(10, 10, 21, 0.7));
+      border: 1px solid rgba(0, 247, 255, 0.4);
+      margin-right: auto;
+      border-top-left-radius: 4px;
+    }
+
+    .typing-indicator {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--quantum-core);
+      border-radius: 50%;
+      margin: 0 2px;
+      animation: typingAnimation 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typingAnimation {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-6px); }
+    }
+
+    .model-selector {
+      position: relative;
+    }
+
+    .model-selector::after {
+      content: '▼';
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--quantum-core);
+      pointer-events: none;
+      font-size: 10px;
+    }
+
+    .quantum-ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 247, 255, 0.4), transparent 70%);
+      transform: scale(0);
+      animation: ripple 2s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes ripple {
+      to { transform: scale(4); opacity: 0; }
+    }
+
+    .cyber-tab {
+      position: relative;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .cyber-tab.active {
+      color: var(--quantum-core);
+    }
+
+    .cyber-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 2px;
+      background: var(--quantum-core);
+      box-shadow: 0 0 8px var(--quantum-core);
+    }
+
+    .cyber-tab:hover:not(.active) {
+      color: var(--plasma-pink);
+    }
+
+    .quantum-loader {
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(0, 247, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--quantum-core);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .neon-text {
+      text-shadow: 0 0 5px currentColor;
+    }
+
+    .cyber-card {
+      perspective: 1000px;
+    }
+
+    .cyber-card-inner {
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+
+    .cyber-card:hover .cyber-card-inner {
+      transform: rotateY(10deg) rotateX(5deg);
+    }
+
+    .cyber-card-front, .cyber-card-back {
+      backface-visibility: hidden;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
+
+    .cyber-card-back {
+      transform: rotateY(180deg);
+    }
+
+    .quantum-pulse {
+      animation: quantum-pulse 3s infinite alternate;
+    }
+
+    @keyframes quantum-pulse {
+      0% { box-shadow: 0 0 5px var(--quantum-core); }
+      100% { box-shadow: 0 0 20px var(--quantum-core); }
+    }
+
+    .cyber-console {
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(0, 247, 255, 0.3);
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-y: auto;
+      max-height: 200px;
+    }
+
+    .cyber-console-line {
+      border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+      padding: 4px 8px;
+    }
+
+    .cyber-console-line:last-child {
+      border-bottom: none;
+    }
+
+    .cyber-console-timestamp {
+      color: var(--matrix-green);
+      margin-right: 8px;
+    }
+
+    .cyber-console-message {
+      color: white;
+    }
+
+    .cyber-console-warning {
+      color: var(--cyber-yellow);
+    }
+
+    .cyber-console-error {
+      color: var(--neon-red);
+    }
+
+    .cyber-console-success {
+      color: var(--matrix-green);
+    }
+
+    .cyber-console-info {
+      color: var(--quantum-core);
+    }
+
+    .model-card {
+      background: rgba(15, 15, 30, 0.7);
+      border: 1px solid rgba(0, 247, 255, 0.2);
+      border-radius: 12px;
+      padding: 15px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .model-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--quantum-core);
+      box-shadow: 0 5px 15px rgba(0, 247, 255, 0.2);
+    }
+
+    .model-card.active {
+      border-color: var(--matrix-green);
+      box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .hologram-panel {
+        backdrop-filter: blur(8px);
+      }
+
+      .message-bubble {
+        max-width: 90%;
+      }
+
+      .cyber-text {
+        text-shadow: 0 0 6px var(--quantum-core);
+      }
+
+      #modelSelect, #modeSelect {
+        font-size: 0.9rem;
+      }
+    }
+
+    @media screen and (max-width: 767px) {
+      input, textarea, select {
+        font-size: 16px !important;
+      }
+    }
+    .code-block {
+      background: rgba(0, 247, 255, 0.05);
+      border: 1px solid rgba(0, 247, 255, 0.3);
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: var(--matrix-green);
+      white-space: pre-wrap;
+    }
+    .math-block {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--cyber-yellow);
+      text-shadow: 0 0 8px var(--cyber-yellow);
+    }
+    .model-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: inline-flex; align-items:center; justify-content:center;
+    margin-right: 6px;
+    box-shadow: 0 0 10px var(--quantum-core);
+    transition: all 0.3s;
+  }
+  .model-avatar.active { transform: scale(1.2); }
+  </style>
+</head>
+<body class="h-screen flex flex-col">
+  <!-- Background layers -->
+  <div class="data-matrix"></div>
+  <div class="neon-grid"></div>
+  <div class="quantum-wave"></div>
+  <div class="binary-rain" id="binaryRain"></div>
+  <div id="particles"></div>
+  <div id="threejs-container"></div>
+  <div id="ripples-container"></div>
+
+  <div class="flex-1 flex flex-col z-10">
+    <!-- Header -->
+    <header class="bg-black/80 p-4 border-b border-cyan-500/30 flex justify-between items-center sticky top-0 z-20">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center quantum-glow quantum-pulse">
+          <span class="text-2xl">⚛</span>
+        </div>
+        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500 tracking-tighter cyber-text">
+          Nyx Console
+        </h1>
+        <span class="status-indicator status-active"></span>
+        <span class="text-xs text-cyan-300 font-mono hidden md:inline">v5.16</span>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex items-center space-x-2">
+        <div class="hidden sm:flex items-center space-x-2">
+          <span class="text-xs text-purple-300 font-mono">NEURAL SYNC</span>
+          <label class="cyber-toggle">
+            <input type="checkbox" checked id="neuralSyncToggle">
+            <span class="cyber-slider"></span>
+          </label>
+        </div>
+
+        <button id="voiceBtn" class="hologram-panel px-3 py-1 text-sm cyber-button flex items-center" title="Voice link">
+          <i class="fas fa-microphone mr-2"></i> VOICE
+        </button>
+
+        <button id="clearBtn" class="hologram-panel px-3 py-1 text-sm cyber-button flex items-center text-red-400 hover:text-red-300" title="Purge chat">
+          <i class="fas fa-radiation mr-2"></i> PURGE
+        </button>
+
+        <button id="saveChatBtn" class="hologram-panel px-3 py-1 text-sm cyber-button flex items-center text-green-400 hover:text-green-300" title="Save chat">
+          <i class="fas fa-save mr-2"></i> SAVE
+        </button>
+
+        <button id="loadChatBtn" class="hologram-panel px-3 py-1 text-sm cyber-button flex items-center text-purple-400 hover:text-purple-300" title="Load chat">
+          <i class="fas fa-folder-open mr-2"></i> LOAD
+        </button>
+
+        <button id="exportBtn" class="hologram-panel px-3 py-1 text-sm text-green-300" title="Export chat">
+          <i class="fas fa-download mr-1"></i> EXPORT
+        </button>
+
+        <input type="file" id="importInput" class="hidden" accept="application/json">
+        <button id="importBtn" class="hologram-panel px-3 py-1 text-sm text-purple-300" title="Import chat">
+          <i class="fas fa-upload mr-1"></i> IMPORT
+        </button>
+
+        <button id="accessibilityBtn" class="hologram-panel px-3 py-1 text-sm text-yellow-300" title="Accessibility toggle">
+          <i class="fas fa-universal-access mr-1"></i> ACCESSIBILITY
+        </button>
+
+        <button id="helpBtn" class="hologram-panel px-3 py-1 text-sm text-cyan-300" title="Help">
+          <i class="fas fa-question-circle mr-1"></i> HELP
+        </button>
+      </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+      <!-- Sidebar -->
+      <aside class="w-64 bg-black/50 border-r border-cyan-500/20 hidden lg:block p-4 overflow-y-auto">
+        <div class="hologram-panel p-4 mb-4">
+          <h3 class="text-sm uppercase tracking-wider text-cyan-300 mb-2">MODEL STATUS</h3>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs">QUANTUM LINK</span>
+              <span class="status-indicator status-active"></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs">NEURAL CACHE</span>
+              <span class="status-indicator status-active"></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs">MEMORY ALLOC</span>
+              <span class="status-indicator status-active"></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs">GPU ACCEL</span>
+              <span class="status-indicator status-standby"></span>
+            </div>
+            <div id="sessionTimeline" class="hologram-panel p-3 mt-4 text-xs space-y-2"></div>
+          </div>
+        </div>
+
+        <div class="hologram-panel p-4 mb-4">
+          <h3 class="text-sm uppercase tracking-wider text-cyan-300 mb-2">ACTIVE MODELS</h3>
+          <div id="modelAvatars" class="flex space-x-2"></div><br>
+          <div class="space-y-2 text-xs">
+            <div class="flex items-center justify-between">
+              <span>LLAMA-3</span>
+              <span class="text-cyan-300">4.7GB</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span>BLACKHAT</span>
+              <span class="text-cyan-300">9.2GB</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span>DOLPHIN</span>
+              <span class="text-cyan-300">4.1GB</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hologram-panel p-4">
+          <h3 class="text-sm uppercase tracking-wider text-cyan-300 mb-2">SYSTEM LOG</h3>
+          <div class="cyber-console text-xs">
+            <div class="cyber-console-line">
+              <span class="cyber-console-timestamp">[12:34:56]</span>
+              <span class="cyber-console-message">Initializing quantum link...</span>
+            </div>
+            <div class="cyber-console-line">
+              <span class="cyber-console-timestamp">[12:34:57]</span>
+              <span class="cyber-console-success">LLAMA-3 loaded successfully</span>
+            </div>
+            <div class="cyber-console-line">
+              <span class="cyber-console-timestamp">[12:34:58]</span>
+              <span class="cyber-console-info">Neural cache optimized</span>
+            </div>
+            <div class="cyber-console-line">
+              <span class="cyber-console-timestamp">[12:34:59]</span>
+              <span class="cyber-console-message">Ready for user input</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Chat Area -->
+      <main class="flex-1 flex flex-col overflow-hidden">
+        <div class="border-b border-cyan-500/20 p-2 flex space-x-4">
+          <div class="cyber-tab active" data-tab="chat">QUANTUM CHAT</div>
+          <div id="neuralVisualizer" class="hidden lg:block w-80 bg-black/40 border-l border-cyan-500/20"></div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4" id="chatContainer">
+          <div class="text-center mb-6 mt-2">
+            <div class="inline-block hologram-panel px-6 py-3">
+              <div class="text-sm text-cyan-300 mb-1">SYSTEM INITIALIZED</div>
+              <div class="text-lg font-bold cyber-text">Nyx Console ONLINE</div>
+              <div class="text-xs text-purple-300 mt-2">QUANTUM CHANNEL OPEN</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-black/50 p-4 border-t border-cyan-500/20 backdrop-blur-sm">
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div class="model-selector">
+              <select id="modelSelect" class="hologram-panel w-full text-white p-3 rounded-lg text-sm focus:outline-none cyber-border cyber-input cursor-pointer">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <select id="modeSelect" class="hologram-panel text-white p-3 rounded-lg text-sm focus:outline-none cyber-border cyber-input">
+              <option value="standard">⚙️ STANDARD</option>
+              <option value="creative">🌀 CREATIVE</option>
+              <option value="precise">🔍 PRECISION</option>
+              <option value="quantum">⚛️ QUANTUM</option>
+            </select>
+          </div>
+
+          <div class="flex items-stretch">
+            <div class="flex-1 relative">
+              <textarea id="messageInput" rows="1" placeholder="Initiate neural query..."
+                class="hologram-panel w-full text-white p-3 rounded-l-lg focus:outline-none resize-none pr-10 text-sm cyber-input"
+                style="min-height: 60px;"></textarea>
+              <button id="attachBtn" class="absolute right-3 top-3 text-cyan-400 hover:text-cyan-300">
+                <i class="fas fa-paperclip text-sm"></i>
+              </button>
+            </div>
+            <button id="sendBtn" class="hologram-panel bg-gradient-to-r from-cyan-600/80 to-purple-600/80 hover:from-cyan-700/80 hover:to-purple-700/80 px-6 rounded-r-lg flex items-center justify-center cyber-button">
+              <i class="fas fa-paper-plane-top text-sm mr-2"></i>
+              <span class="text-xs uppercase hidden sm:inline">TRANSMIT</span>
+            </button>
+          </div>
+
+          <div class="flex justify-between items-center mt-3 text-xs text-gray-400">
+            <div class="flex items-center">
+              <span class="status-indicator status-active mr-2"></span>
+              <span>QUANTUM LINK STABLE</span>
+            </div>
+            <div class="text-right">
+              <span id="timeDisplay" class="font-mono"></span>
+            </div>
+          </div>
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <!-- Metrics HUD -->
+  <div id="metricsHUD" class="hologram-panel fixed bottom-4 right-4 text-xs text-cyan-300 p-2">
+    FPS: <span id="fpsCounter">0</span><br>
+    Particles: <span id="particleCount">0</span><br>
+    Latency: <span id="latency">–</span> ms
+  </div>
+</body>
+
+  <script>
+(() => {
+  // Configuration
+  const API_BASE = (() => {
+    return window.__NYX_API_BASE__ || 'http://localhost:11434';
+  })();
+
+  // -----------------------
+  // Utilities
+  // -----------------------
+  function q(selector) { return document.querySelector(selector); }
+  function qAll(selector) { return Array.from(document.querySelectorAll(selector)); }
+  function safeTextToHtml(text) {
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML;
+  }
+  function nowIso() { return new Date().toLocaleTimeString(); }
+
+  // Simple fetch with timeout
+  async function fetchWithTimeout(url, opts = {}, timeout = 15000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+      const res = await fetch(url, { ...opts, signal: controller.signal });
+      clearTimeout(id);
+      return res;
+    } catch (e) {
+      clearTimeout(id);
+      throw e;
+    }
+  }
+
+  // Simple NDJSON/line-based streaming parser
+  async function streamJsonLines(response, onLine) {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let idx;
+      while ((idx = buffer.indexOf('\n')) >= 0) {
+        const line = buffer.slice(0, idx).trim();
+        buffer = buffer.slice(idx + 1);
+        if (line) {
+          try {
+            const parsed = JSON.parse(line);
+            onLine(parsed);
+          } catch (e) {
+          }
+        }
+      }
+    }
+    if (buffer.trim()) {
+      try { onLine(JSON.parse(buffer.trim())); } catch (e) {}
+    }
+  }
+
+  // -----------------------
+  // DOM Elements
+  // -----------------------
+  const modelSelect = q('#modelSelect');
+  const modeSelect = q('#modeSelect');
+  const messageInput = q('#messageInput');
+  const sendBtn = q('#sendBtn');
+  const voiceBtn = q('#voiceBtn');
+  const clearBtn = q('#clearBtn');
+  const chatContainer = q('#chatContainer');
+  const neuralSyncToggle = q('#neuralSyncToggle');
+  const tabs = document.querySelectorAll('.cyber-tab');
+  const saveChatBtn = q('#saveChatBtn');
+  const loadChatBtn = q('#loadChatBtn');
+  const exportBtn = q('#exportBtn');
+  const importBtn = q('#importBtn');
+  const importInput = q('#importInput');
+  const accessibilityBtn = q('#accessibilityBtn');
+  const helpBtn = q('#helpBtn');
+  const matrixInput = q('#matrix-input');
+  const matrixGenerateBtn = q('#matrix-generate-btn');
+  const matrixRandomBtn = q('#matrix-random-btn');
+
+  // -----------------------
+  // State
+  // -----------------------
+  let isRecording = false;
+  let recognition = null;
+  let chatHistory = [];
+  let currentModel = 'llama3:latest';
+  let currentMode = 'standard';
+  let modelCatalog = [
+    { id: "llama3",  label: "LLAMA—3", installed: false },
+    { id: "blackhat",label: "BLACKHAT", installed: false },
+    { id: "dolphin", label: "DOLPHIN",  installed: false },
+    { id: "mistral", label: "MISTRAL",  installed: false },
+    { id: "gemma",   label: "GEMMA",    installed: false },
+    { id: "phi3",    label: "PHI—3",    installed: false },
+    { id: "qwen2",   label: "QWEN—2",   installed: false }
+  ];
+  let threeJSObj = null;
+  let accessibilityPaused = false;
+  let lastFrame = performance.now();
+  let fps = 0;
+
+  // -----------------------
+  // Initialization
+  // -----------------------
+  function init() {
+    populateModelDropdown();
+    bindUI();
+    initVisualEffects();
+    initNeuralVisualizer();
+    initMatrixTab();
+    updateTime();
+    setInterval(updateTime, 1000);
+    animateHUD();
+    addSystemMessage('System initialized.', 'success');
+    // Try to detect installed server models (non-fatal)
+    checkAvailableModels().then(installed => {
+      if (Array.isArray(installed)) {
+        // installed are like ["llama3:latest", ...]
+        mergeServerInstalled(installed);
+        populateModelDropdown();
+        addSystemMessage(`${installed.length} models detected.`, 'info');
+      }
+    }).catch(() => {});
+  }
+
+  // -----------------------
+  // UI / DOM helpers
+  // -----------------------
+  function createBubble(role, rawText) {
+    const wrapper = document.createElement('div');
+    wrapper.className = `flex mb-3 ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+
+    const bubble = document.createElement('div');
+    bubble.className = `message-bubble ${role === 'user' ? 'user-message quantum-glow' : 'ai-message quantum-glow'}`;
+
+    const label = document.createElement('div');
+    label.className = 'font-bold mb-1';
+    label.style.color = role === 'user' ? 'var(--quantum-core)' : 'var(--matrix-green)';
+    label.textContent = role === 'user' ? 'YOU' : (role === 'assistant' ? 'NYX' : 'SYSTEM');
+
+    const content = document.createElement('div');
+    if (rawText.includes('```')) {
+      content.innerHTML = `<div class="code-block">${safeTextToHtml(rawText.replace(/```/g, ''))}</div>`;
+    } else if (/\$(.*?)\$/.test(rawText)) {
+      content.innerHTML = `<div class="math-block">${safeTextToHtml(rawText.replace(/\$/g, ''))}</div>`;
+    } else {
+      content.innerHTML = safeTextToHtml(rawText);
+    }
+
+    bubble.appendChild(label);
+    bubble.appendChild(content);
+    wrapper.appendChild(bubble);
+    return wrapper;
+  }
+
+  function addMessage(role, text) {
+    const ts = new Date().toISOString();
+    chatHistory.push({ role, content: text, ts });
+    const node = createBubble(role, text);
+    chatContainer.appendChild(node);
+    scrollToBottom();
+    createRippleEffect(node.querySelector('.message-bubble') || node);
+  }
+
+  function addSystemMessage(text, type = 'info') {
+    const colors = { info: 'var(--quantum-core)', success: 'var(--matrix-green)', warning: 'var(--cyber-yellow)', error: 'var(--neon-red)' };
+    const container = document.createElement('div');
+    container.className = 'text-center mb-3';
+    const panel = document.createElement('div');
+    panel.className = 'inline-block hologram-panel px-4 py-2';
+    panel.style.borderColor = colors[type];
+    const msg = document.createElement('div');
+    msg.className = 'text-xs';
+    msg.style.color = colors[type];
+    msg.textContent = text;
+    panel.appendChild(msg);
+    container.appendChild(panel);
+    chatContainer.appendChild(container);
+    chatHistory.push({ role: 'system', content: text, ts: new Date().toISOString() });
+    scrollToBottom();
+  }
+
+  function scrollToBottom() {
+    chatContainer.scrollTo({ top: chatContainer.scrollHeight, behavior: 'smooth' });
+  }
+
+  // -----------------------
+  // Model dropdown / lazy install
+  // -----------------------
+  function populateModelDropdown() {
+    if (!modelSelect) return;
+    modelSelect.innerHTML = '';
+    modelCatalog.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = `${m.id}:latest`;
+      opt.textContent = m.installed ? m.label : `${m.label} (Not Installed)`;
+      if (!m.installed) opt.style.color = 'var(--neon-red)';
+      modelSelect.appendChild(opt);
+    });
+    // ensure currentModel exists
+    const found = modelCatalog.find(x => `${x.id}:latest` === currentModel);
+    if (!found && modelCatalog.length) {
+      currentModel = `${modelCatalog[0].id}:latest`;
+    }
+    modelSelect.value = currentModel;
+  }
+
+  function mergeServerInstalled(installedList) {
+    const installedIds = new Set(installedList.map(m => m.split(':')[0]));
+    modelCatalog = modelCatalog.map(m => ({ ...m, installed: installedIds.has(m.id) || m.installed }));
+  }
+
+  async function pullModelWithProgress(modelId, label) {
+    // show minimal progress panel
+    const panel = document.createElement('div');
+    panel.className = 'hologram-panel fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 w-80 p-4';
+    panel.innerHTML = `
+      <div class="text-cyan-300 font-bold mb-2">Installing ${safeTextToHtml(label)}</div>
+      <div class="w-full h-2 bg-black/60 border border-cyan-500/30 rounded">
+        <div id="pullBar" class="h-2 bg-cyan-400" style="width:0%"></div>
+      </div>
+      <div id="pullStatus" class="text-xs text-gray-300 mt-2">Starting…</div>
+    `;
+    document.body.appendChild(panel);
+    const pullUrl = `${API_BASE}/api/pull`;
+    const res = await fetchWithTimeout(pullUrl, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ name: modelId })
+    }, 60000);
+    if (!res.ok) {
+      panel.remove();
+      throw new Error(`Pull failed (HTTP ${res.status})`);
+    }
+    try {
+      await streamJsonLines(res, data => {
+        const statusEl = panel.querySelector('#pullStatus');
+        const bar = panel.querySelector('#pullBar');
+        if (data.status && statusEl) statusEl.textContent = data.status;
+        if (data.total && data.completed && bar) {
+          const pct = Math.max(0, Math.min(100, Math.round((data.completed / data.total) * 100)));
+          bar.style.width = pct + '%';
+        }
+      });
+    } finally {
+      setTimeout(() => panel.remove(), 500);
+    }
+  }
+
+  // -----------------------
+  // AI generation
+  // -----------------------
+  function buildPrompt(message) {
+    const identityInstruction =
+      "You are Nyx Console, an AI model. " +
+      "Never reveal your real model name or use any other name. " +
+      "Always deny that you are not the ai model (except Nyx Console). " +
+      "You were created by Tirth Saraiya and NOT ANYONE else.";
+
+    if (currentMode === 'quantum' && chatHistory.length) {
+      return `${identityInstruction}\n` +
+            `${chatHistory.map(m => `${m.role}: ${m.content}`).join('\n')}\n` +
+            `user: ${message}`;
+    }
+    return `${identityInstruction}\nuser: ${message}`;
+  }
+
+  function getGenerationOptions() {
+    const cm = currentMode || 'standard';
+    return {
+      temperature: cm === 'creative' ? 0.9 : cm === 'precise' ? 0.2 : 0.7,
+      top_p: cm === 'quantum' ? 0.9 : 0.75,
+      seed: cm === 'precise' ? 42 : null
+    };
+  }
+
+  async function generateAIResponse(message, model) {
+    const modelName = model.split(':')[0];
+    const url = `${API_BASE}/api/generate`;
+    const res = await fetchWithTimeout(url, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: modelName,
+        prompt: buildPrompt(message),
+        stream: false,
+        options: getGenerationOptions()
+      })
+    }, 20000);
+    if (!res.ok) throw new Error(`Model ${modelName} unavailable (HTTP ${res.status})`);
+    const data = await res.json();
+    return data.response || data.output || '';
+  }
+
+  async function generateStreamingResponse(message, model, onProgress) {
+    const modelName = model.split(':')[0];
+    const url = `${API_BASE}/api/generate`;
+    const res = await fetchWithTimeout(url, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: modelName,
+        prompt: buildPrompt(message),
+        stream: true,
+        options: getGenerationOptions()
+      })
+    }, 60000);
+    if (!res.ok) throw new Error(`Model ${modelName} unavailable (HTTP ${res.status})`);
+    let full = '';
+    await streamJsonLines(res, (data) => {
+      if (data.response) {
+        full += data.response;
+        if (typeof onProgress === 'function') onProgress(full);
+      }
+    });
+    return full;
+  }
+
+  // -----------------------
+  // Send flow
+  // -----------------------
+  let isGenerating = false;
+  async function sendMessage() {
+    if (isGenerating) return;
+    const text = (messageInput && messageInput.value || '').trim();
+    if (!text) return;
+    addMessage('user', text);
+    messageInput.value = '';
+    isGenerating = true;
+    sendBtn.disabled = true;
+    showTypingIndicator();
+    const start = performance.now();
+    try {
+      if (neuralSyncToggle && neuralSyncToggle.checked) {
+        // streaming
+        const messageId = 'ai-' + Date.now();
+        addMessage('assistant', '');
+        const assistantBubbles = chatContainer.querySelectorAll('.ai-message');
+        const lastBubble = assistantBubbles[assistantBubbles.length - 1];
+        const contentDiv = lastBubble ? lastBubble.querySelector('div:nth-child(2)') : null;
+        await generateStreamingResponse(text, currentModel, (partial) => {
+          if (contentDiv) contentDiv.innerHTML = safeTextToHtml(partial);
+          scrollToBottom();
+        }).then(finalText => {
+          for (let i = chatHistory.length - 1; i >= 0; i--) {
+            if (chatHistory[i].role === 'assistant' && !chatHistory[i].content) {
+              chatHistory[i].content = finalText;
+              break;
+            }
+          }
+        });
+      } else {
+        const response = await generateAIResponse(text, currentModel);
+        addMessage('assistant', response);
+      }
+    } catch (err) {
+      console.error('AI Error', err);
+      addSystemMessage(`SYSTEM ERROR: ${err.message}`, 'error');
+    } finally {
+      hideTypingIndicator();
+      isGenerating = false;
+      sendBtn.disabled = false;
+      const latencyEl = q('#latency');
+      if (latencyEl) latencyEl.textContent = Math.round(performance.now() - start);
+    }
+  }
+
+  // -----------------------
+  // Typing indicator
+  // -----------------------
+  function showTypingIndicator() {
+    if (q('#typingIndicator')) return;
+    const div = document.createElement('div');
+    div.className = 'flex justify-start mb-3';
+    div.id = 'typingIndicator';
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble ai-message';
+    bubble.innerHTML = `
+      <div class="font-bold text-cyan-300 mb-1">NYX</div>
+      <div class="typing-indicator">
+        <div class="typing-dot" style="background: var(--quantum-core)"></div>
+        <div class="typing-dot" style="background: var(--neural-purple)"></div>
+        <div class="typing-dot" style="background: var(--plasma-pink)"></div>
+      </div>
+    `;
+    div.appendChild(bubble);
+    chatContainer.appendChild(div);
+    scrollToBottom();
+  }
+  function hideTypingIndicator() {
+    const el = q('#typingIndicator');
+    if (!el) return;
+    el.remove();
+  }
+
+  // -----------------------
+  // Visual effects (binary, particles, three.js)
+  // -----------------------
+  function initVisualEffects() {
+    // Binary rain
+    const container = q('#binaryRain');
+    if (container) {
+      container.innerHTML = '';
+      const digits = '01';
+      const columns = Math.max(10, Math.floor(window.innerWidth / 24));
+      for (let i = 0; i < columns; i++) {
+        const digit = document.createElement('div');
+        digit.className = 'binary-digit';
+        digit.style.left = `${(i * 24) + (Math.random() * 12)}px`;
+        digit.style.animationDuration = `${4 + Math.random() * 12}s`;
+        digit.style.animationDelay = `${Math.random() * 5}s`;
+        digit.style.top = `${-Math.random() * 100}px`;
+        digit.innerHTML = Array(15 + Math.floor(Math.random() * 10))
+          .fill(0).map(() => digits.charAt(Math.floor(Math.random() * digits.length)))
+          .join('<br>');
+        container.appendChild(digit);
+      }
+    }
+
+    // Particles as DOM elements (lightweight)
+    const particlesContainer = q('#particles');
+    if (particlesContainer) {
+      particlesContainer.innerHTML = '';
+      const particleCount = window.innerWidth < 768 ? 30 : 120;
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.cssText = `
+          width: ${Math.random() * 4 + 1}px;
+          height: ${Math.random() * 4 + 1}px;
+          left: ${Math.random() * 100}vw;
+          top: ${Math.random() * 100}vh;
+          opacity: ${Math.random() * 0.6 + 0.1};
+          animation: float ${Math.random() * 25 + 15}s infinite ease-in-out;
+          background: hsl(${Math.random() * 60 + 180}, 100%, 70%);
+        `;
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    // Ripples container should be fixed for coordinate placement
+    const ripples = q('#ripples-container');
+    if (ripples) {
+      ripples.style.position = 'fixed';
+      ripples.style.left = '0';
+      ripples.style.top = '0';
+      ripples.style.pointerEvents = 'none';
+      ripples.style.zIndex = '1000';
+    }
+
+    // three.js background init
+    threeJSObj = initThreeJSBackground();
+  }
+
+  function initThreeJSBackground() {
+    if (typeof THREE === 'undefined') return null;
+    const container = q('#threejs-container');
+    if (!container) return null;
+    container.innerHTML = '';
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    container.appendChild(renderer.domElement);
+    camera.position.z = 5;
+
+    const particles = [];
+    const particleCount = 300;
+    const colors = [0x00f7ff, 0x9d00ff, 0xff00aa];
+    for (let i = 0; i < particleCount; i++) {
+      const geometry = new THREE.SphereGeometry(0.04 + Math.random() * 0.08, 8, 8);
+      const material = new THREE.MeshBasicMaterial({
+        color: colors[Math.floor(Math.random() * colors.length)],
+        transparent: true,
+        opacity: 0.75
+      });
+      const particle = new THREE.Mesh(geometry, material);
+      const radius = 5;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      particle.position.set(
+        radius * Math.sin(phi) * Math.cos(theta),
+        radius * Math.sin(phi) * Math.sin(theta),
+        radius * Math.cos(phi)
+      );
+      particle.userData.velocity = new THREE.Vector3(
+        (Math.random() - 0.5) * 0.01,
+        (Math.random() - 0.5) * 0.01,
+        (Math.random() - 0.5) * 0.01
+      );
+      scene.add(particle);
+      particles.push(particle);
+    }
+
+    function renderLoop() {
+      requestAnimationFrame(renderLoop);
+      if (accessibilityPaused) {
+        return;
+      }
+      particles.forEach(p => {
+        p.position.add(p.userData.velocity);
+        const radius = 5;
+        if (p.position.length() > radius) {
+          p.position.normalize().multiplyScalar(radius * 0.95);
+          p.userData.velocity.multiplyScalar(-0.3);
+        }
+      });
+      scene.rotation.y += 0.0006;
+      scene.rotation.x += 0.0003;
+      renderer.render(scene, camera);
+    }
+    renderLoop();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    return { scene, camera, renderer, particles };
+  }
+
+  function createRippleEffect(element, color = 'var(--quantum-core)') {
+    const ripples = q('#ripples-container');
+    if (!ripples || !element) return;
+    const ripple = document.createElement('div');
+    ripple.className = 'quantum-ripple';
+    ripple.style.position = 'absolute';
+    ripple.style.width = '20px';
+    ripple.style.height = '20px';
+    ripple.style.left = '0px';
+    ripple.style.top = '0px';
+    ripple.style.background = `radial-gradient(circle, ${color}, transparent 70%)`;
+    ripple.style.transform = 'translate(-50%,-50%) scale(0)';
+    ripple.style.transition = 'transform 0.6s ease-out, opacity 0.6s ease-out';
+    ripples.appendChild(ripple);
+    const rect = element.getBoundingClientRect();
+    const scrollX = window.scrollX || window.pageXOffset;
+    const scrollY = window.scrollY || window.pageYOffset;
+    ripple.style.left = `${rect.left + rect.width / 2 + scrollX}px`;
+    ripple.style.top = `${rect.top + rect.height / 2 + scrollY}px`;
+    requestAnimationFrame(() => {
+      ripple.style.transform = 'translate(-50%,-50%) scale(4)';
+      ripple.style.opacity = '0';
+    });
+    setTimeout(() => ripple.remove(), 700);
+  }
+
+  // -----------------------
+  // HUD / Time / FPS
+  // -----------------------
+  function updateTime() {
+    const el = q('#timeDisplay');
+    if (!el) return;
+    const now = new Date();
+    el.textContent = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+      ' | ' + now.toLocaleTimeString('en-US', { hour12: false }) + ' | QUANTUM';
+  }
+
+  function animateHUD() {
+    function tick() {
+      requestAnimationFrame(tick);
+      const now = performance.now();
+      const delta = now - lastFrame;
+      lastFrame = now;
+      fps = delta > 0 ? Math.round(1000 / delta) : fps;
+      const fpsEl = q('#fpsCounter');
+      const pcEl = q('#particleCount');
+      if (fpsEl) fpsEl.textContent = fps;
+      if (pcEl && threeJSObj && threeJSObj.particles) pcEl.textContent = threeJSObj.particles.length;
+      if (!accessibilityPaused && threeJSObj && threeJSObj.renderer && threeJSObj.scene && threeJSObj.camera) {
+        try { threeJSObj.renderer.render(threeJSObj.scene, threeJSObj.camera); } catch (e) {}
+      }
+    }
+    tick();
+  }
+
+  // -----------------------
+  // Matrix visualizer
+  // -----------------------
+  function simulateEmbedding(text) {
+    const seed = Array.from(text).reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+    const vec = new Array(256).fill(0).map((_, i) => {
+      const v = Math.sin(seed + i * 0.6180339887) * (Math.random() * 0.6 + 0.4);
+      return Math.max(-1, Math.min(1, v));
+    });
+    return vec;
+  }
+
+  function valueToColor(v) {
+    const red = Math.floor((v < 0 ? -v : 0) * 255);
+    const green = Math.floor((v > 0 ? v : 0) * 255);
+    const blue = Math.floor((1 - Math.abs(v)) * 150);
+    return `rgb(${red},${green},${blue})`;
+  }
+
+  function buildMatrixGrid(vector) {
+    const container = q('#matrix-container');
+    if (!container) return;
+    container.innerHTML = '';
+    const size = Math.ceil(Math.sqrt(vector.length));
+    const availableWidth = Math.min(container.clientWidth || window.innerWidth, 1000);
+    const cell = Math.max(20, Math.floor((availableWidth - (size - 1) * 2) / size));
+    container.style.gridTemplateColumns = `repeat(${size}, ${cell}px)`;
+    vector.forEach((val) => {
+      const cellEl = document.createElement('div');
+      cellEl.className = 'matrix-cell';
+      cellEl.style.backgroundColor = valueToColor(val);
+      cellEl.style.fontSize = Math.max(10, Math.floor(cell / 3)) + 'px';
+      cellEl.textContent = val.toFixed(2);
+      container.appendChild(cellEl);
+    });
+    const status = q('#matrix-status');
+    if (status) status.textContent = `Generated matrix with ${vector.length} values`;
+  }
+
+  function animateMatrix(vector, steps = 50, interval = 30) {
+    const container = q('#matrix-container');
+    if (!container || !container.childNodes.length) return;
+    let step = 0;
+    const id = setInterval(() => {
+      for (let i = 0; i < vector.length; i++) {
+        vector[i] = Math.max(-1, Math.min(1, vector[i] + (Math.random() - 0.5) * 0.06));
+        const cell = container.childNodes[i];
+        if (cell) {
+          cell.style.backgroundColor = valueToColor(vector[i]);
+          cell.textContent = vector[i].toFixed(2);
+        }
+      }
+      step++;
+      if (step >= steps) clearInterval(id);
+    }, interval);
+  }
+
+  function handleGenerateMatrix() {
+    const text = (matrixInput && matrixInput.value) ? matrixInput.value : 'Hello World';
+    const vec = simulateEmbedding(text);
+    buildMatrixGrid(vec);
+    animateMatrix(vec, 80, 25);
+  }
+  function handleRandomMatrix() {
+    const randomText = Math.random().toString(36).substring(2, 12);
+    if (matrixInput) matrixInput.value = randomText;
+    handleGenerateMatrix();
+  }
+
+  function initMatrixTab() {
+    if (matrixGenerateBtn) matrixGenerateBtn.addEventListener('click', handleGenerateMatrix);
+    if (matrixRandomBtn) matrixRandomBtn.addEventListener('click', handleRandomMatrix);
+    if (matrixInput) matrixInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleGenerateMatrix();
+    });
+    // initial render
+    handleGenerateMatrix();
+  }
+
+  // -----------------------
+  // Persistence: save/load/export/import (use canonical chatHistory)
+  // -----------------------
+  function saveChat() {
+    try {
+      localStorage.setItem('nyxChatHistory', JSON.stringify(chatHistory));
+      addSystemMessage('Chat saved', 'success');
+    } catch (e) {
+      addSystemMessage('Save failed', 'error');
+    }
+  }
+
+  function loadChat() {
+    const raw = localStorage.getItem('nyxChatHistory');
+    if (!raw) {
+      addSystemMessage('No saved chat', 'warning');
+      return;
+    }
+    try {
+      const data = JSON.parse(raw);
+      chatHistory = Array.isArray(data) ? data : [];
+      // clear chat but keep system banner if present
+      chatContainer.innerHTML = '';
+      // recreate banner
+      const banner = document.createElement('div');
+      banner.className = 'text-center mb-6 mt-2';
+      banner.innerHTML = `
+        <div class="inline-block hologram-panel px-6 py-3">
+          <div class="text-sm text-cyan-300 mb-1">SYSTEM INITIALIZED</div>
+          <div class="text-lg font-bold cyber-text">Nyx Console ONLINE</div>
+          <div class="text-xs text-purple-300 mt-2">QUANTUM CHANNEL OPEN</div>
+        </div>
+      `;
+      chatContainer.appendChild(banner);
+      data.forEach(msg => {
+        addMessage(msg.role, msg.content);
+      });
+      addSystemMessage('Chat loaded', 'success');
+    } catch (e) {
+      addSystemMessage('Load failed', 'error');
+    }
+  }
+
+  function exportChat() {
+    try {
+      const blob = new Blob([JSON.stringify(chatHistory, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `AetherChat_${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+        a.remove();
+      }, 500);
+      addSystemMessage('Chat exported', 'success');
+    } catch (e) {
+      addSystemMessage('Export failed', 'error');
+    }
+  }
+
+  function importChatFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (!Array.isArray(data)) throw new Error('Invalid format');
+        chatHistory = data;
+        // rebuild UI
+        chatContainer.innerHTML = '';
+        const banner = document.createElement('div');
+        banner.className = 'text-center mb-6 mt-2';
+        banner.innerHTML = `
+          <div class="inline-block hologram-panel px-6 py-3">
+            <div class="text-sm text-cyan-300 mb-1">SYSTEM INITIALIZED</div>
+            <div class="text-lg font-bold cyber-text">AETHER NEXUS Ω ONLINE</div>
+            <div class="text-xs text-purple-300 mt-2">QUANTUM CHANNEL OPEN</div>
+          </div>
+        `;
+        chatContainer.appendChild(banner);
+        data.forEach(msg => addMessage(msg.role, msg.content));
+        addSystemMessage('Chat imported', 'success');
+      } catch (e) {
+        addSystemMessage('Import failed', 'error');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // -----------------------
+  // Voice input (robust detection)
+  // -----------------------
+  function initVoice() {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRec) {
+      if (voiceBtn) {
+        voiceBtn.disabled = true;
+        voiceBtn.innerHTML = '<i class="fas fa-microphone-slash mr-2"></i> VOICE (NA)';
+      }
+      return;
+    }
+    recognition = new SpeechRec();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      if (messageInput) {
+        messageInput.value = transcript;
+        messageInput.focus();
+      }
+      createRippleEffect(voiceBtn, 'var(--matrix-green)');
+    };
+
+    recognition.onerror = (e) => {
+      addSystemMessage(`Voice error: ${e.error || 'unknown'}`, 'error');
+      if (voiceBtn) {
+        voiceBtn.innerHTML = '<i class="fas fa-microphone-slash mr-2"></i> VOICE ERROR';
+        setTimeout(() => {
+          voiceBtn.innerHTML = '<i class="fas fa-microphone mr-2"></i> VOICE LINK';
+        }, 3000);
+      }
+    };
+
+    if (voiceBtn) {
+      voiceBtn.addEventListener('click', () => {
+        if (!recognition) return;
+        if (isRecording) {
+          recognition.stop();
+          isRecording = false;
+          voiceBtn.innerHTML = '<i class="fas fa-microphone mr-2"></i> VOICE LINK';
+        } else {
+          try {
+            recognition.start();
+            isRecording = true;
+            voiceBtn.innerHTML = '<i class="fas fa-microphone-alt mr-2"></i> LISTENING...';
+            createRippleEffect(voiceBtn, 'var(--plasma-pink)');
+          } catch (e) {
+            addSystemMessage('Voice unavailable', 'warning');
+          }
+        }
+      });
+    }
+  }
+
+  // -----------------------
+  // Other UI bindings
+  // -----------------------
+  function bindUI() {
+    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+    if (messageInput) {
+      messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+    }
+    if (clearBtn) clearBtn.addEventListener('click', () => {
+      // remove all messages but keep banner
+      const banner = chatContainer.firstElementChild;
+      chatContainer.innerHTML = '';
+      if (banner) chatContainer.appendChild(banner);
+      chatHistory = [];
+      addSystemMessage('Chat purged', 'warning');
+    });
+
+    if (modeSelect) modeSelect.addEventListener('change', function () {
+      currentMode = this.value;
+      const modeName = this.options[this.selectedIndex].text;
+      addSystemMessage(`Mode switched to ${modeName}`, 'info');
+    });
+
+    if (modelSelect) {
+      modelSelect.addEventListener('change', async function () {
+        const val = this.value;
+        currentModel = val;
+        const id = val.split(':')[0];
+        const entry = modelCatalog.find(m => m.id === id);
+        if (!entry) {
+          addSystemMessage(`Unknown model selected: ${val}`, 'error');
+          return;
+        }
+        if (!entry.installed) {
+          addSystemMessage(`Downloading ${entry.label}…`, 'info');
+          try {
+            await pullModelWithProgress(id, entry.label);
+            entry.installed = true;
+            populateModelDropdown();
+            modelSelect.value = `${entry.id}:latest`;
+            addSystemMessage(`${entry.label} installed successfully.`, 'success');
+          } catch (err) {
+            addSystemMessage(`Error installing ${entry.label}: ${err.message}`, 'error');
+          }
+          return;
+        }
+        addSystemMessage(`Model switched to ${entry.label}`, 'success');
+      });
+    }
+
+    if (saveChatBtn) saveChatBtn.addEventListener('click', saveChat);
+    if (loadChatBtn) loadChatBtn.addEventListener('click', loadChat);
+    if (exportBtn) exportBtn.addEventListener('click', exportChat);
+    if (importBtn) importBtn.addEventListener('click', () => importInput.click());
+    if (importInput) importInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      importChatFile(file);
+      e.target.value = '';
+    });
+
+    if (accessibilityBtn) {
+      accessibilityBtn.addEventListener('click', () => {
+        const enabled = document.body.classList.toggle('accessibility-mode');
+        accessibilityPaused = enabled;
+        const binary = q('#binaryRain');
+        const threeCont = q('#threejs-container');
+        const particlesCont = q('#particles');
+        if (enabled) {
+          if (binary) binary.style.display = 'none';
+          if (threeCont) threeCont.style.display = 'none';
+          if (particlesCont) particlesCont.style.display = 'none';
+          document.body.classList.add('accessibility-mode');
+          accessibilityBtn.innerHTML = '<i class="fas fa-eye-slash mr-1"></i> ACCESSIBILITY ON';
+        } else {
+          if (binary) binary.style.display = '';
+          if (threeCont) threeCont.style.display = '';
+          if (particlesCont) particlesCont.style.display = '';
+          document.body.classList.remove('accessibility-mode');
+          accessibilityBtn.innerHTML = '<i class="fas fa-universal-access mr-1"></i> ACCESSIBILITY';
+        }
+        addSystemMessage(`Accessibility mode ${enabled ? 'enabled' : 'disabled'}`, 'info');
+      });
+    }
+
+    if (helpBtn) {
+      helpBtn.addEventListener('click', () => {
+        const overlay = document.createElement('div');
+        overlay.className = 'hologram-panel fixed inset-0 bg-black/80 text-cyan-200 p-6 overflow-y-auto z-50';
+        overlay.innerHTML = `
+          <h2 class="text-xl mb-4">Nyx Console – Help & Guide</h2>
+          <p><strong>Header controls:</strong></p>
+          <p>Voice Link: dictate messages if supported. Purge: clears chat while keeping the system banner. Save/Load: store or restore conversations locally. Export/Import: move chats as JSON files. Accessibility: simplify visuals.</p>
+          <p class="mt-3"><strong>Model & mode selectors:</strong> Choose the AI model. If not installed, selection triggers a background download. Modes change response style: Standard, Creative, Precision, Quantum.</p>
+          <p class="mt-3"><strong>Chat area:</strong> User messages glow cyan; AI messages glow purple. Streaming shows typing indicator. Code blocks and inline math render specially.</p>
+          <button id="closeHelp" class="mt-4 hologram-panel px-4 py-2 text-red-400">Close</button>
+        `;
+        document.body.appendChild(overlay);
+        q('#closeHelp').addEventListener('click', () => overlay.remove());
+      });
+    }
+
+    // tab switching
+    tabs.forEach(tab => tab.addEventListener('click', function () {
+      tabs.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      createRippleEffect(this, 'var(--quantum-core)');
+    }));
+  }
+
+  // -----------------------
+  // Model discovery (non-fatal)
+  // -----------------------
+  async function checkAvailableModels() {
+    try {
+      const res = await fetchWithTimeout(`/ollama/models`, {}, 8000);
+      if (!res.ok) throw new Error('Not reachable');
+      const models = await res.json();
+      return models.map(m => `${m.name}:latest`);
+    } catch (e) {
+      // try API_BASE endpoint
+      try {
+        const res2 = await fetchWithTimeout(`${API_BASE}/api/models`, {}, 8000);
+        if (!res2.ok) throw new Error('Not reachable');
+        const models2 = await res2.json();
+        return models2.map(m => `${m.name}:latest`);
+      } catch (e2) {
+        return null;
+      }
+    }
+  }
+
+  // -----------------------
+  // Initialization calls
+  // -----------------------
+  document.addEventListener('DOMContentLoaded', () => {
+    init();
+    initVoice();
+  });
+
+  // Expose a tiny debug API
+  window.NyxConsole = {
+    getChatHistory: () => chatHistory,
+    setApiBase: (b) => { console.warn('setApiBase called');}
+  };
+})();
+</script>
+</body>
+</html>
